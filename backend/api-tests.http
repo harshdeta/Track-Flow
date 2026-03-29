@@ -1,0 +1,484 @@
+### ==========================================
+### EXPENSE MANAGEMENT SYSTEM — API Tests
+### VS Code REST Client (.http file)
+### Install: "REST Client" extension by Huachao Mao
+### ==========================================
+
+@baseUrl = http://localhost:5000/api
+@contentType = application/json
+
+### ----
+### NOTE: After running Signup or Login, copy the
+### token from the response and paste it below:
+### ----
+@adminToken    = PASTE_ADMIN_TOKEN_HERE
+@managerToken  = PASTE_MANAGER_TOKEN_HERE
+@employeeToken = PASTE_EMPLOYEE_TOKEN_HERE
+@managerId     = PASTE_MANAGER_ID_HERE
+@employeeId    = PASTE_EMPLOYEE_ID_HERE
+@expenseId     = PASTE_EXPENSE_ID_HERE
+@ruleId        = PASTE_RULE_ID_HERE
+
+
+
+# ═══════════════════════════════════════════
+# 🔐 AUTH
+# ═══════════════════════════════════════════
+
+### 1. Signup — Create Company + Admin
+# @name signup
+POST {{baseUrl}}/auth/signup
+Content-Type: {{contentType}}
+
+{
+  "companyName": "Acme Corp",
+  "country": "India",
+  "baseCurrency": "INR",
+  "name": "John Admin",
+  "email": "admin@acme.com",
+  "password": "admin1234"
+}
+
+###
+
+### 2. Login — Admin
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@acme.com",
+  "password": "admin1234"
+}
+
+###
+
+### 3. Login — Manager (run after creating manager)
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "sarah@acme.com",
+  "password": "mgr1234"
+}
+
+###
+
+### 4. Login — Employee (run after creating employee)
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "bob@acme.com",
+  "password": "emp1234"
+}
+
+###
+
+### 5. Get My Profile
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{adminToken}}
+
+###
+
+
+
+# ═══════════════════════════════════════════
+# 👥 USER MANAGEMENT (Admin only)
+# ═══════════════════════════════════════════
+
+### 6. Create Manager
+# Copy _id from response → paste into @managerId above
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Sarah Manager",
+  "email": "sarah@acme.com",
+  "password": "mgr1234",
+  "role": "manager",
+  "department": "Engineering"
+}
+
+###
+
+### 7. Create Employee (assigned to manager)
+# Copy _id from response → paste into @employeeId above
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Bob Employee",
+  "email": "bob@acme.com",
+  "password": "emp1234",
+  "role": "employee",
+  "managerId": "{{managerId}}"
+}
+
+###
+
+### 8. Get All Users
+GET {{baseUrl}}/users
+Authorization: Bearer {{adminToken}}
+
+###
+
+### 9. Get Single User
+GET {{baseUrl}}/users/{{employeeId}}
+Authorization: Bearer {{adminToken}}
+
+###
+
+### 10. Update User
+PATCH {{baseUrl}}/users/{{employeeId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "department": "Finance"
+}
+
+###
+
+### 11. Deactivate User
+DELETE {{baseUrl}}/users/{{employeeId}}
+Authorization: Bearer {{adminToken}}
+
+###
+
+
+
+# ═══════════════════════════════════════════
+# 📋 APPROVAL RULES (Admin only)
+# ═══════════════════════════════════════════
+
+### 12. Create Rule — Sequential (manager first)
+# Copy _id from response → paste into @ruleId above
+POST {{baseUrl}}/approval-rules
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Travel - Manager Sequential",
+  "category": "travel",
+  "flowType": "sequential",
+  "approvers": ["{{managerId}}"],
+  "isManagerApprover": false,
+  "priority": 10
+}
+
+###
+
+### 13. Create Rule — Parallel with 60% threshold
+POST {{baseUrl}}/approval-rules
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Software - Parallel 60%",
+  "category": "software",
+  "flowType": "parallel",
+  "approvers": ["{{managerId}}"],
+  "minApprovalPercent": 60,
+  "priority": 5
+}
+
+###
+
+### 14. Create Default/Catch-All Rule
+POST {{baseUrl}}/approval-rules
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Default Rule",
+  "category": null,
+  "flowType": "sequential",
+  "approvers": ["{{managerId}}"],
+  "isManagerApprover": false,
+  "priority": 0
+}
+
+###
+
+### 15. Get All Approval Rules
+GET {{baseUrl}}/approval-rules
+Authorization: Bearer {{adminToken}}
+
+###
+
+### 16. Get Single Rule
+GET {{baseUrl}}/approval-rules/{{ruleId}}
+Authorization: Bearer {{adminToken}}
+
+###
+
+### 17. Update Rule
+PATCH {{baseUrl}}/approval-rules/{{ruleId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "priority": 20,
+  "amountThreshold": 1000
+}
+
+###
+
+### 18. Deactivate Rule
+DELETE {{baseUrl}}/approval-rules/{{ruleId}}
+Authorization: Bearer {{adminToken}}
+
+###
+
+
+
+# ═══════════════════════════════════════════
+# 🧾 EXPENSES
+# ═══════════════════════════════════════════
+
+### 19. Create Expense — Draft (employee)
+# Copy _id from response → paste into @expenseId above
+POST {{baseUrl}}/expenses
+Content-Type: {{contentType}}
+Authorization: Bearer {{employeeToken}}
+
+{
+  "amount": 5000,
+  "currency": "INR",
+  "category": "travel",
+  "description": "Flight to Mumbai for client meeting",
+  "date": "2025-03-15",
+  "paidBy": "employee",
+  "submitImmediately": false
+}
+
+###
+
+### 20. Create Expense — Auto-Submit for Approval
+POST {{baseUrl}}/expenses
+Content-Type: {{contentType}}
+Authorization: Bearer {{employeeToken}}
+
+{
+  "amount": 1500,
+  "currency": "INR",
+  "category": "meals",
+  "description": "Team dinner after sprint review",
+  "date": "2025-03-20",
+  "submitImmediately": true
+}
+
+###
+
+### 21. Submit Draft Expense for Approval
+POST {{baseUrl}}/expenses/{{expenseId}}/submit
+Authorization: Bearer {{employeeToken}}
+
+###
+
+### 22. Get All Expenses (role-filtered)
+GET {{baseUrl}}/expenses?status=pending&page=1&limit=10
+Authorization: Bearer {{adminToken}}
+
+###
+
+### 23. Get Single Expense + Approval History
+GET {{baseUrl}}/expenses/{{expenseId}}
+Authorization: Bearer {{adminToken}}
+
+###
+
+### 24. Update Draft Expense
+PATCH {{baseUrl}}/expenses/{{expenseId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{employeeToken}}
+
+{
+  "description": "Updated: Return flight to Mumbai included",
+  "remarks": "Receipt will be uploaded separately"
+}
+
+###
+
+### 25. Cancel Expense
+DELETE {{baseUrl}}/expenses/{{expenseId}}
+Authorization: Bearer {{employeeToken}}
+
+###
+
+
+
+# ═══════════════════════════════════════════
+# ✅ APPROVALS
+# ═══════════════════════════════════════════
+
+### 26. Get Pending Approvals (Manager's queue)
+GET {{baseUrl}}/approvals/pending
+Authorization: Bearer {{managerToken}}
+
+###
+
+### 27. Approve Expense
+POST {{baseUrl}}/approvals/{{expenseId}}/approve
+Content-Type: {{contentType}}
+Authorization: Bearer {{managerToken}}
+
+{
+  "comment": "Approved. Legitimate business travel expense."
+}
+
+###
+
+### 28. Reject Expense
+POST {{baseUrl}}/approvals/{{expenseId}}/reject
+Content-Type: {{contentType}}
+Authorization: Bearer {{managerToken}}
+
+{
+  "comment": "Missing receipt. Please resubmit with proper documentation."
+}
+
+###
+
+### 29. View Approval Audit History
+GET {{baseUrl}}/approvals/{{expenseId}}/history
+Authorization: Bearer {{adminToken}}
+
+###
+
+### 30. Admin Force Override (approve/reject bypassing workflow)
+POST {{baseUrl}}/approvals/{{expenseId}}/admin-override
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "action": "approved",
+  "comment": "Fast-tracked by admin for urgent reimbursement."
+}
+
+###
+
+
+
+# ═══════════════════════════════════════════
+# 📊 REPORTS & ANALYTICS
+# ═══════════════════════════════════════════
+
+### 31. Dashboard Summary (Admin/Manager)
+GET {{baseUrl}}/reports/summary
+Authorization: Bearer {{adminToken}}
+
+###
+
+### 32. My Expense Report (Employee)
+GET {{baseUrl}}/reports/my-expenses
+Authorization: Bearer {{employeeToken}}
+
+###
+
+### 33. Approval Team Performance
+GET {{baseUrl}}/reports/approvals
+Authorization: Bearer {{adminToken}}
+
+###
+
+
+
+# ═══════════════════════════════════════════
+# 📎 RECEIPT UPLOAD
+# ═══════════════════════════════════════════
+
+### 34. Upload Receipt (use form-data in REST Client GUI or Postman)
+### For REST Client: multipart not supported inline — use Postman/Bruno for file upload
+### Or use the curl command below in terminal:
+### curl -X POST http://localhost:5000/api/upload/receipt/EXPENSE_ID \
+###   -H "Authorization: Bearer YOUR_TOKEN" \
+###   -F "receipt=@/path/to/receipt.pdf"
+
+### 35. Remove Receipt from Expense
+DELETE {{baseUrl}}/upload/receipt/{{expenseId}}
+Authorization: Bearer {{employeeToken}}
+
+###
+
+
+
+# ═══════════════════════════════════════════
+# ❤️  HEALTH & INFO
+# ═══════════════════════════════════════════
+
+### 36. Health Check
+GET http://localhost:5000/health
+
+###
+
+### 37. API Info (all endpoints listed)
+GET http://localhost:5000/api
+
+###
+
+
+
+# ═══════════════════════════════════════════
+# ❌ VALIDATION TESTS (Expected: 400)
+# ═══════════════════════════════════════════
+
+### 38. Missing required fields (expect 400)
+POST {{baseUrl}}/auth/signup
+Content-Type: {{contentType}}
+
+{
+  "name": "Only Name"
+}
+
+###
+
+### 39. Invalid email format (expect 400)
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "notanemail",
+  "password": "pass"
+}
+
+###
+
+### 40. Invalid expense category (expect 400)
+POST {{baseUrl}}/expenses
+Content-Type: {{contentType}}
+Authorization: Bearer {{employeeToken}}
+
+{
+  "amount": 100,
+  "currency": "INR",
+  "category": "invalid_category",
+  "description": "test",
+  "date": "2025-03-15"
+}
+
+###
+
+### 41. Negative amount (expect 400)
+POST {{baseUrl}}/expenses
+Content-Type: {{contentType}}
+Authorization: Bearer {{employeeToken}}
+
+{
+  "amount": -50,
+  "currency": "INR",
+  "category": "travel",
+  "description": "test expense",
+  "date": "2025-03-15"
+}
+
+###
+
+### 42. Employee accessing admin route (expect 403)
+GET {{baseUrl}}/reports/summary
+Authorization: Bearer {{employeeToken}}
+
+###
