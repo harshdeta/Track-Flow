@@ -1,0 +1,373 @@
+{
+  "clientName": "Thunder Client",
+  "collectionName": "Expense Management System API",
+  "collectionId": "expense-mgmt-v1",
+  "dateExported": "2026-03-29",
+  "version": "1.1",
+  "folders": [
+    { "id": "f-auth", "name": "🔐 Auth", "containerId": "" },
+    { "id": "f-users", "name": "👥 Users", "containerId": "" },
+    { "id": "f-expenses", "name": "🧾 Expenses", "containerId": "" },
+    { "id": "f-approvals", "name": "✅ Approvals", "containerId": "" },
+    { "id": "f-rules", "name": "📋 Approval Rules", "containerId": "" },
+    { "id": "f-reports", "name": "📊 Reports", "containerId": "" },
+    { "id": "f-upload", "name": "📎 Upload", "containerId": "" }
+  ],
+  "requests": [
+    {
+      "id": "r-01", "colId": "expense-mgmt-v1", "containerId": "f-auth",
+      "name": "1. Signup (Create Company + Admin)",
+      "url": "{{baseUrl}}/api/auth/signup",
+      "method": "POST",
+      "sortNum": 1,
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"companyName\": \"Acme Corp\",\n  \"country\": \"India\",\n  \"baseCurrency\": \"INR\",\n  \"name\": \"John Admin\",\n  \"email\": \"admin@acme.com\",\n  \"password\": \"admin1234\"\n}"
+      }
+    },
+    {
+      "id": "r-02", "colId": "expense-mgmt-v1", "containerId": "f-auth",
+      "name": "2. Login",
+      "url": "{{baseUrl}}/api/auth/login",
+      "method": "POST",
+      "sortNum": 2,
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"email\": \"admin@acme.com\",\n  \"password\": \"admin1234\"\n}"
+      }
+    },
+    {
+      "id": "r-03", "colId": "expense-mgmt-v1", "containerId": "f-auth",
+      "name": "3. Get Me (Profile)",
+      "url": "{{baseUrl}}/api/auth/me",
+      "method": "GET",
+      "sortNum": 3,
+      "headers": [{ "name": "Authorization", "value": "Bearer {{adminToken}}" }]
+    },
+    {
+      "id": "r-10", "colId": "expense-mgmt-v1", "containerId": "f-users",
+      "name": "Create Manager",
+      "url": "{{baseUrl}}/api/users",
+      "method": "POST",
+      "sortNum": 1,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{adminToken}}" }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"Sarah Manager\",\n  \"email\": \"sarah@acme.com\",\n  \"password\": \"mgr1234\",\n  \"role\": \"manager\",\n  \"department\": \"Engineering\"\n}"
+      }
+    },
+    {
+      "id": "r-11", "colId": "expense-mgmt-v1", "containerId": "f-users",
+      "name": "Create Employee",
+      "url": "{{baseUrl}}/api/users",
+      "method": "POST",
+      "sortNum": 2,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{adminToken}}" }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"Bob Employee\",\n  \"email\": \"bob@acme.com\",\n  \"password\": \"emp1234\",\n  \"role\": \"employee\",\n  \"managerId\": \"{{managerId}}\"\n}"
+      }
+    },
+    {
+      "id": "r-12", "colId": "expense-mgmt-v1", "containerId": "f-users",
+      "name": "Get All Users",
+      "url": "{{baseUrl}}/api/users",
+      "method": "GET",
+      "sortNum": 3,
+      "headers": [{ "name": "Authorization", "value": "Bearer {{adminToken}}" }]
+    },
+    {
+      "id": "r-13", "colId": "expense-mgmt-v1", "containerId": "f-users",
+      "name": "Get User By ID",
+      "url": "{{baseUrl}}/api/users/{{userId}}",
+      "method": "GET",
+      "sortNum": 4,
+      "headers": [{ "name": "Authorization", "value": "Bearer {{adminToken}}" }]
+    },
+    {
+      "id": "r-14", "colId": "expense-mgmt-v1", "containerId": "f-users",
+      "name": "Update User",
+      "url": "{{baseUrl}}/api/users/{{userId}}",
+      "method": "PATCH",
+      "sortNum": 5,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{adminToken}}" }
+      ],
+      "body": { "type": "json", "raw": "{\n  \"department\": \"Finance\"\n}" }
+    },
+    {
+      "id": "r-15", "colId": "expense-mgmt-v1", "containerId": "f-users",
+      "name": "Deactivate User",
+      "url": "{{baseUrl}}/api/users/{{userId}}",
+      "method": "DELETE",
+      "sortNum": 6,
+      "headers": [{ "name": "Authorization", "value": "Bearer {{adminToken}}" }]
+    },
+    {
+      "id": "r-20", "colId": "expense-mgmt-v1", "containerId": "f-expenses",
+      "name": "Create Expense (Draft)",
+      "url": "{{baseUrl}}/api/expenses",
+      "method": "POST",
+      "sortNum": 1,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{employeeToken}}" }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"amount\": 5000,\n  \"currency\": \"INR\",\n  \"category\": \"travel\",\n  \"description\": \"Flight to Mumbai for client meeting\",\n  \"date\": \"2025-03-15\",\n  \"paidBy\": \"employee\",\n  \"submitImmediately\": false\n}"
+      }
+    },
+    {
+      "id": "r-21", "colId": "expense-mgmt-v1", "containerId": "f-expenses",
+      "name": "Create + Auto Submit Expense",
+      "url": "{{baseUrl}}/api/expenses",
+      "method": "POST",
+      "sortNum": 2,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{employeeToken}}" }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"amount\": 1500,\n  \"currency\": \"INR\",\n  \"category\": \"meals\",\n  \"description\": \"Team dinner after sprint review\",\n  \"date\": \"2025-03-20\",\n  \"submitImmediately\": true\n}"
+      }
+    },
+    {
+      "id": "r-22", "colId": "expense-mgmt-v1", "containerId": "f-expenses",
+      "name": "Submit Draft for Approval",
+      "url": "{{baseUrl}}/api/expenses/{{expenseId}}/submit",
+      "method": "POST",
+      "sortNum": 3,
+      "headers": [{ "name": "Authorization", "value": "Bearer {{employeeToken}}" }]
+    },
+    {
+      "id": "r-23", "colId": "expense-mgmt-v1", "containerId": "f-expenses",
+      "name": "Get All Expenses",
+      "url": "{{baseUrl}}/api/expenses?status=pending&page=1&limit=10",
+      "method": "GET",
+      "sortNum": 4,
+      "headers": [{ "name": "Authorization", "value": "Bearer {{adminToken}}" }]
+    },
+    {
+      "id": "r-24", "colId": "expense-mgmt-v1", "containerId": "f-expenses",
+      "name": "Get Expense By ID",
+      "url": "{{baseUrl}}/api/expenses/{{expenseId}}",
+      "method": "GET",
+      "sortNum": 5,
+      "headers": [{ "name": "Authorization", "value": "Bearer {{adminToken}}" }]
+    },
+    {
+      "id": "r-25", "colId": "expense-mgmt-v1", "containerId": "f-expenses",
+      "name": "Update Expense (Draft Only)",
+      "url": "{{baseUrl}}/api/expenses/{{expenseId}}",
+      "method": "PATCH",
+      "sortNum": 6,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{employeeToken}}" }
+      ],
+      "body": { "type": "json", "raw": "{\n  \"description\": \"Updated description\",\n  \"remarks\": \"Receipt attached\"\n}" }
+    },
+    {
+      "id": "r-26", "colId": "expense-mgmt-v1", "containerId": "f-expenses",
+      "name": "Cancel Expense",
+      "url": "{{baseUrl}}/api/expenses/{{expenseId}}",
+      "method": "DELETE",
+      "sortNum": 7,
+      "headers": [{ "name": "Authorization", "value": "Bearer {{employeeToken}}" }]
+    },
+    {
+      "id": "r-30", "colId": "expense-mgmt-v1", "containerId": "f-approvals",
+      "name": "Get Pending Approvals",
+      "url": "{{baseUrl}}/api/approvals/pending",
+      "method": "GET",
+      "sortNum": 1,
+      "headers": [{ "name": "Authorization", "value": "Bearer {{managerToken}}" }]
+    },
+    {
+      "id": "r-31", "colId": "expense-mgmt-v1", "containerId": "f-approvals",
+      "name": "Approve Expense",
+      "url": "{{baseUrl}}/api/approvals/{{expenseId}}/approve",
+      "method": "POST",
+      "sortNum": 2,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{managerToken}}" }
+      ],
+      "body": { "type": "json", "raw": "{\n  \"comment\": \"Approved. Legitimate business expense.\"\n}" }
+    },
+    {
+      "id": "r-32", "colId": "expense-mgmt-v1", "containerId": "f-approvals",
+      "name": "Reject Expense",
+      "url": "{{baseUrl}}/api/approvals/{{expenseId}}/reject",
+      "method": "POST",
+      "sortNum": 3,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{managerToken}}" }
+      ],
+      "body": { "type": "json", "raw": "{\n  \"comment\": \"Missing receipt. Please resubmit with documentation.\"\n}" }
+    },
+    {
+      "id": "r-33", "colId": "expense-mgmt-v1", "containerId": "f-approvals",
+      "name": "View Approval History",
+      "url": "{{baseUrl}}/api/approvals/{{expenseId}}/history",
+      "method": "GET",
+      "sortNum": 4,
+      "headers": [{ "name": "Authorization", "value": "Bearer {{adminToken}}" }]
+    },
+    {
+      "id": "r-34", "colId": "expense-mgmt-v1", "containerId": "f-approvals",
+      "name": "Admin Override",
+      "url": "{{baseUrl}}/api/approvals/{{expenseId}}/admin-override",
+      "method": "POST",
+      "sortNum": 5,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{adminToken}}" }
+      ],
+      "body": { "type": "json", "raw": "{\n  \"action\": \"approved\",\n  \"comment\": \"Fast-tracked by admin.\"\n}" }
+    },
+    {
+      "id": "r-40", "colId": "expense-mgmt-v1", "containerId": "f-rules",
+      "name": "Create Approval Rule (Sequential)",
+      "url": "{{baseUrl}}/api/approval-rules",
+      "method": "POST",
+      "sortNum": 1,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{adminToken}}" }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"Travel - Sequential\",\n  \"category\": \"travel\",\n  \"flowType\": \"sequential\",\n  \"approvers\": [\"{{managerId}}\"],\n  \"isManagerApprover\": true,\n  \"priority\": 10\n}"
+      }
+    },
+    {
+      "id": "r-41", "colId": "expense-mgmt-v1", "containerId": "f-rules",
+      "name": "Create Approval Rule (Parallel 60%)",
+      "url": "{{baseUrl}}/api/approval-rules",
+      "method": "POST",
+      "sortNum": 2,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{adminToken}}" }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"Software - Parallel 60%\",\n  \"category\": \"software\",\n  \"flowType\": \"parallel\",\n  \"approvers\": [\"{{managerId}}\"],\n  \"minApprovalPercent\": 60,\n  \"priority\": 5\n}"
+      }
+    },
+    {
+      "id": "r-42", "colId": "expense-mgmt-v1", "containerId": "f-rules",
+      "name": "Create Catch-All Rule with CFO Override",
+      "url": "{{baseUrl}}/api/approval-rules",
+      "method": "POST",
+      "sortNum": 3,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{adminToken}}" }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"Default - CFO Override\",\n  \"category\": null,\n  \"flowType\": \"sequential\",\n  \"approvers\": [\"{{managerId}}\"],\n  \"specialApproverId\": \"{{adminId}}\",\n  \"priority\": 0\n}"
+      }
+    },
+    {
+      "id": "r-43", "colId": "expense-mgmt-v1", "containerId": "f-rules",
+      "name": "Get All Rules",
+      "url": "{{baseUrl}}/api/approval-rules",
+      "method": "GET",
+      "sortNum": 4,
+      "headers": [{ "name": "Authorization", "value": "Bearer {{adminToken}}" }]
+    },
+    {
+      "id": "r-44", "colId": "expense-mgmt-v1", "containerId": "f-rules",
+      "name": "Update Rule",
+      "url": "{{baseUrl}}/api/approval-rules/{{ruleId}}",
+      "method": "PATCH",
+      "sortNum": 5,
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{adminToken}}" }
+      ],
+      "body": { "type": "json", "raw": "{\n  \"priority\": 20,\n  \"amountThreshold\": 1000\n}" }
+    },
+    {
+      "id": "r-45", "colId": "expense-mgmt-v1", "containerId": "f-rules",
+      "name": "Deactivate Rule",
+      "url": "{{baseUrl}}/api/approval-rules/{{ruleId}}",
+      "method": "DELETE",
+      "sortNum": 6,
+      "headers": [{ "name": "Authorization", "value": "Bearer {{adminToken}}" }]
+    },
+    {
+      "id": "r-50", "colId": "expense-mgmt-v1", "containerId": "f-reports",
+      "name": "Dashboard Summary (Admin/Manager)",
+      "url": "{{baseUrl}}/api/reports/summary",
+      "method": "GET",
+      "sortNum": 1,
+      "headers": [{ "name": "Authorization", "value": "Bearer {{adminToken}}" }]
+    },
+    {
+      "id": "r-51", "colId": "expense-mgmt-v1", "containerId": "f-reports",
+      "name": "My Expense Report (Employee)",
+      "url": "{{baseUrl}}/api/reports/my-expenses",
+      "method": "GET",
+      "sortNum": 2,
+      "headers": [{ "name": "Authorization", "value": "Bearer {{employeeToken}}" }]
+    },
+    {
+      "id": "r-52", "colId": "expense-mgmt-v1", "containerId": "f-reports",
+      "name": "Approval Stats Report",
+      "url": "{{baseUrl}}/api/reports/approvals",
+      "method": "GET",
+      "sortNum": 3,
+      "headers": [{ "name": "Authorization", "value": "Bearer {{adminToken}}" }]
+    },
+    {
+      "id": "r-60", "colId": "expense-mgmt-v1", "containerId": "f-upload",
+      "name": "Upload Receipt",
+      "url": "{{baseUrl}}/api/upload/receipt/{{expenseId}}",
+      "method": "POST",
+      "sortNum": 1,
+      "headers": [{ "name": "Authorization", "value": "Bearer {{employeeToken}}" }],
+      "body": {
+        "type": "formdata",
+        "params": [{ "name": "receipt", "value": "", "type": "file" }]
+      }
+    },
+    {
+      "id": "r-61", "colId": "expense-mgmt-v1", "containerId": "f-upload",
+      "name": "Delete Receipt",
+      "url": "{{baseUrl}}/api/upload/receipt/{{expenseId}}",
+      "method": "DELETE",
+      "sortNum": 2,
+      "headers": [{ "name": "Authorization", "value": "Bearer {{employeeToken}}" }]
+    }
+  ],
+  "settings": {
+    "headers": [],
+    "variables": [
+      { "name": "baseUrl", "value": "http://localhost:5000" },
+      { "name": "adminToken",    "value": "PASTE_ADMIN_JWT_HERE" },
+      { "name": "managerToken",  "value": "PASTE_MANAGER_JWT_HERE" },
+      { "name": "employeeToken", "value": "PASTE_EMPLOYEE_JWT_HERE" },
+      { "name": "managerId",     "value": "PASTE_MANAGER_ID_HERE" },
+      { "name": "employeeId",    "value": "PASTE_EMPLOYEE_ID_HERE" },
+      { "name": "adminId",       "value": "PASTE_ADMIN_ID_HERE" },
+      { "name": "expenseId",     "value": "PASTE_EXPENSE_ID_HERE" },
+      { "name": "ruleId",        "value": "PASTE_RULE_ID_HERE" }
+    ]
+  }
+}
